@@ -18,26 +18,18 @@ $(document).ready(function () {
 			tabla += '</tr>';
 		}
 		tabla += '</table>';
+		let contador = 1;
 		$('#tabla').html(tabla);
 		for (i = 1; i <= 10; i++) {
 			for (j = 1; j <= 10; j++) {
-				(function (i, j) {
-					$.ajax({
-						type: 'GET',
-						dataType: 'json',
-						xhrFields: {
-							withCredentials: true,
-						},
-						success: function (source) {
-							$('#' + i + 'x' + j).removeClass(
-								'spinner-border spinner-border-sm'
-							);
-							//$("#" + i + 'x' + j).html(source.result);
-							document.getElementById(i + 'x' + j).innerHTML = source.result;
-							//console.log("valores de i y de j: ",i,j);
-						},
-					});
-				})(i, j);
+				(async function () {
+					await asynCall(i, j);
+					contador++;
+					if (contador == 100) {
+						document.getElementById('advertisement').innerHTML =
+							'SE HAN CARGADO TODOS LOS VALORES DEL SERVIDOR';
+					}
+				})();
 			}
 		}
 		return false;
@@ -51,11 +43,14 @@ $(document).ready(function () {
 	async function asynCall(i, j) {
 		let maxdelay = 5000 - i * j * 40;
 		const url = `http://localhost:8081/sermiller/control?op1=${i}&op2=${j}&maxdelay=${maxdelay}`;
-		const options = { credentials: true };
+		const options = { mode: 'cors', credentials: 'include' };
 
 		const response = await fetch(url, options);
-		const data = response.json();
-
-		return data;
+		if (!response.ok) console.log(`An Error has occured: ${response.status}`);
+		const data = await response.json();
+		document
+			.getElementById(`${data.op1}x${data.op2}`)
+			.classList.remove('spinner-border', 'spinner-border-sm');
+		document.getElementById(`${data.op1}x${data.op2}`).innerHTML = data.result;
 	}
 });

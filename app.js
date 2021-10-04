@@ -23,7 +23,19 @@ $(document).ready(function () {
 		for (i = 1; i <= 10; i++) {
 			for (j = 1; j <= 10; j++) {
 				(async function () {
-					await asynCall(i, j);
+					let maxdelay = 5000 - i * j * 40;
+					const url = `http://localhost:8081/sermiller/control?op1=${i}&op2=${j}&maxdelay=${maxdelay}`;
+					const options = { mode: 'cors', credentials: 'include' };
+
+					const response = await fetch(url, options);
+					if (!response.ok)
+						console.log(`An Error has occured: ${response.status}`);
+					const data = await response.json();
+					console.log(data);
+					let cell = document.getElementById(`${data.op1}x${data.op2}`);
+					cell.classList.remove('spinner-border', 'spinner-border-sm');
+					cell.innerHTML = data.result;
+
 					contador++;
 					if (contador == 100) {
 						document.getElementById('advertisement').innerHTML =
@@ -40,17 +52,16 @@ $(document).ready(function () {
 		return false;
 	});
 
-	async function asynCall(i, j) {
-		let maxdelay = 5000 - i * j * 40;
-		const url = `http://localhost:8081/sermiller/control?op1=${i}&op2=${j}&maxdelay=${maxdelay}`;
-		const options = { mode: 'cors', credentials: 'include' };
+	// async function asynCall(i, j) {
+	// 	let maxdelay = 5000 - i * j * 40;
+	// 	const url = `http://localhost:8081/sermiller/control?op1=${i}&op2=${j}&maxdelay=${maxdelay}`;
+	// 	const options = { mode: 'cors', credentials: 'include' };
 
-		const response = await fetch(url, options);
-		if (!response.ok) console.log(`An Error has occured: ${response.status}`);
-		const data = await response.json();
-		document
-			.getElementById(`${data.op1}x${data.op2}`)
-			.classList.remove('spinner-border', 'spinner-border-sm');
-		document.getElementById(`${data.op1}x${data.op2}`).innerHTML = data.result;
-	}
+	// 	const response = await fetch(url, options);
+	// 	if (!response.ok) console.log(`An Error has occured: ${response.status}`);
+	// 	const data = await response.json();
+	// 	let cell = document.getElementById(`${data.op1}x${data.op2}`);
+	// 	cell.classList.remove('spinner-border', 'spinner-border-sm');
+	// 	cell.innerHTML = data.result;
+	// }
 });
